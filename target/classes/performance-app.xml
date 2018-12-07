@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:vm="http://www.mulesoft.org/schema/mule/vm" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd">
+    <vm:connector name="VM" validateConnections="true" doc:name="VM"/>
+    <queued-asynchronous-processing-strategy name="Queued_Asynchronous_Processing_Strategy" maxThreads="200" minThreads="50" threadTTL="1000000" threadWaitTimeout="1000000" queueTimeout="1000000" doc:name="Queued Asynchronous Processing Strategy">
+        <file-queue-store/>
+    </queued-asynchronous-processing-strategy>
+    <flow name="performance-appFlow1" processingStrategy="Queued_Asynchronous_Processing_Strategy">
+        <vm:inbound-endpoint exchange-pattern="one-way"  doc:name="VM" connector-ref="VM" path="One"/>
+        <component class="com.mulesoft.EnricherAuctionComponent" doc:name="Java"/>
+        <collection-aggregator failOnTimeout="true" doc:name="Collection Aggregator"/>
+        <component doc:name="Java" class="com.mulesoft.HighestBidderAuctionComponent"/>
+    </flow>
+    <flow name="performance-appFlow">
+        <file:inbound-endpoint path="C:\Users\IBM_ADMIN\Desktop\Mule\APDevAdvanced3.8_studentFiles_21jul2017\APDevAdvanced3.8_studentFiles_21jul2017\resources" moveToPattern="bids.text" responseTimeout="10000" doc:name="File"/>
+        <file:file-to-string-transformer doc:name="File to String"/>
+        <expression-component doc:name="Expression"/>
+        <collection-splitter doc:name="Collection Splitter"/>
+        <vm:outbound-endpoint exchange-pattern="one-way"  doc:name="VM" connector-ref="VM" path="One"/>
+    </flow>
+</mule>
